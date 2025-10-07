@@ -13,7 +13,7 @@ jobs:
     name: test-all # PRs can require just this job to pass, regardless of matrix changes below
     needs: [test_matrix]
     steps:
-      - run: "Test-matrix successful"
+      - run: echo "Test-matrix successful" # anything with zero exit code
 
   test_matrix:
     strategy:
