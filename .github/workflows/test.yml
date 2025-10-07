@@ -9,15 +9,24 @@ on:
 
 jobs:
   test:
+    runs-on: ubuntu-latest
+    name: test-all # PRs can require just this job to pass, regardless of matrix changes below
+    needs: [test_matrix]
+    steps:
+      - run: echo "Test-matrix successful" # anything with zero exit code
+
+  test_matrix:
     strategy:
       matrix:
-        os: [macos-15-intel, ubuntu-latest]
-        solc: ['0.8.30', '0.8.25']
+        os: [macos-15-intel, ubuntu-latest] # arm64 and Windows aren't supported
+        solc: ['0.8.30', '0.8.25'] # arbitrary, but different
     name: setup-solc
     runs-on: ${{ matrix.os }}
     steps:
+        - uses: actions/checkout@v5
+
         - id: setup
-          uses: arr4n/setup-solc@main
+          uses: ./
           with:
             version: ${{matrix.solc}}
 
