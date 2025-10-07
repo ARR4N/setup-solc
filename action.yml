@@ -1,0 +1,12 @@
+name: 'Setup solc'
+description: 'Install the Solidity compiler'
+inputs:
+  version:
+    description: 'Specific solc version'
+    required: true
+outputs:
+  solc:
+    description: 'Path to solc binary'
+runs:
+  using: 'node20'
+  main: 'dist/index.js'

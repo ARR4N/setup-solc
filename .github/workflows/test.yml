@@ -1,0 +1,25 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [macos-15-intel, ubuntu-latest]
+        solc: ['0.8.30', '0.8.25']
+    name: setup-solc
+    runs-on: ${{ matrix.os }}
+    steps:
+        - id: setup
+          uses: arr4n/setup-solc@main
+          with:
+            version: ${{matrix.solc}}
+
+        - name: Check version
+          run: solc --version | grep "${{matrix.solc}}"
