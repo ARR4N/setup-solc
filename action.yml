@@ -1,5 +1,7 @@
 name: 'Setup solc'
 description: 'Install the Solidity compiler'
+icon: download
+color: blue
 inputs:
   version:
     description: 'Specific solc version'
