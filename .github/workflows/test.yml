@@ -16,8 +16,10 @@ jobs:
     name: setup-solc
     runs-on: ${{ matrix.os }}
     steps:
+        - uses: actions/checkout@v5
+
         - id: setup
-          uses: arr4n/setup-solc@main
+          uses: ./
           with:
             version: ${{matrix.solc}}
 
