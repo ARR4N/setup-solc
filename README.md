@@ -10,7 +10,7 @@ jobs:
     name: print-solc-version
     runs-on: ubuntu-latest
     steps:
-        - uses: arr4n/setup-solc@main
+        - uses: arr4n/setup-solc@main # TODO: use a commit hash for better security
           with:
             version: 0.8.30
 
