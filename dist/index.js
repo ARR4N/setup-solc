@@ -29819,9 +29819,6 @@ function requireToolCache () {
 var toolCacheExports = requireToolCache();
 
 try {
-    const version = coreExports.getInput('version');
-    coreExports.info(`Setting up solc version ${version}`);
-
     if (process.arch != 'x64') {
         throw Error(`Unsupported architecture ${process.arch}`)
     }
@@ -29839,27 +29836,57 @@ try {
     }
 
     const constructURL = (fileName) => `https://binaries.soliditylang.org/${pathPrefix}/${fileName}`;
-
     const list = await fetch(constructURL('list.json')).then(res => res.json());
-
-    const build = list.builds.find((build) => build.version == version);
-    if (build === undefined) {
-        throw Error(`Version ${version} not found`);
-    }
-
-    const downloaded = await toolCacheExports.downloadTool(constructURL(build.path));
 
     const destDir = path.join(process.cwd(), 'setup-solc_downloads');
     await fs.mkdir(destDir);
-    const solc = path.join(destDir, 'solc');
-    await fs.rename(downloaded, solc);
-    await fs.chmod(solc, 0o555);
-
     coreExports.addPath(destDir);
-    coreExports.setOutput('solc', solc);
-    coreExports.info(`solc at ${solc}`);
+
+    for (const [version, outs] of Object.entries(parseVersionInputs())) {
+        coreExports.info(`Setting up solc version ${version}`);
+
+        const build = list.builds.find((build) => build.version == version);
+        if (build === undefined) {
+            throw Error(`Version ${version} not found`);
+        }
+
+        const downloaded = await toolCacheExports.downloadTool(constructURL(build.path));
+        await fs.chmod(downloaded, 0o555);
+
+        await Promise.all(
+            outs.map((out) => fs.copyFile(
+                downloaded,
+                path.join(destDir, out)
+            ))
+        );
+        console.info(`${version} at ${outs}`);
+    }
 
 } catch (error) {
     coreExports.setFailed(error.message);
+}
+
+function parseVersionInputs() {
+    let versions = {};
+
+    const v = coreExports.getInput('version');
+    if (v != '') {
+        versions[v] = ['solc'];
+    }
+
+    const multi = coreExports.getInput('versions');
+    if (multi == '') {
+        return versions
+    }
+    multi.split(',').forEach((v) => {
+        const out = `solc-v${v}`;
+        if (v in versions) {
+            versions[v].push(out);
+        } else {
+            versions[v] = [out];
+        }
+    });
+
+    return versions;
 }
 //# sourceMappingURL=index.js.map
