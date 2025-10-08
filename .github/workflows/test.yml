@@ -20,7 +20,7 @@ jobs:
       matrix:
         os: [macos-15-intel, ubuntu-latest] # arm64 and Windows aren't supported
         solc: ['0.8.30', '0.8.25'] # arbitrary, but different
-    name: setup-solc
+    name: setup-solc_${{matrix.solc}}_${{matrix.os}}
     runs-on: ${{ matrix.os }}
     steps:
         - uses: actions/checkout@v5
@@ -34,7 +34,7 @@ jobs:
           run: solc --version | grep "${{matrix.solc}}"
 
   test_multi:
-    name: setup-solc
+    name: setup-solc-multi-version
     runs-on: ubuntu-latest
     steps:
         - uses: actions/checkout@v5
