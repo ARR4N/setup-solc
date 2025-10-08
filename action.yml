@@ -5,11 +5,11 @@ branding:
   color: blue
 inputs:
   version:
-    description: 'Specific solc version'
-    required: true
-outputs:
-  solc:
-    description: 'Path to solc binary'
+    description: 'Version to be installed as `solc`'
+    default: ''
+  versions:
+    description: 'Comma-separated list of versions to be installed as `solc-v<ver>'
+    default: ''
 runs:
   using: 'node20'
   main: 'dist/index.js'

@@ -1,8 +1,9 @@
 {
   "name": "setup-solc",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "author": "github.com/arr4n",
+  "license": "MIT",
   "description": "A GitHub action for installing the Solidity compiler, solc.",
   "dependencies": {
     "@actions/core": "^1.11.1",
