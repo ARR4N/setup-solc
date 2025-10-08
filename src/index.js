@@ -36,7 +36,7 @@ try {
         }
 
         const downloaded = await tc.downloadTool(constructURL(build.path));
-        await fs.chmod(downloaded(0o555));
+        await fs.chmod(downloaded, 0o555);
 
         await Promise.all(
             outs.map((out) => fs.copyFile(
