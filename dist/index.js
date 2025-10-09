@@ -29820,73 +29820,65 @@ var toolCacheExports = requireToolCache();
 
 try {
     if (process.arch != 'x64') {
-        throw Error(`Unsupported architecture ${process.arch}`)
+        throw Error(`Unsupported architecture ${process.arch}`);
     }
-
     let pathPrefix;
     switch (process.platform) {
         case 'darwin':
             pathPrefix = 'macosx-amd64';
-            break
+            break;
         case 'linux':
             pathPrefix = 'linux-amd64';
-            break
+            break;
         default:
             throw Error(`Unsupported platform ${process.platform}`);
     }
-
     const constructURL = (fileName) => `https://binaries.soliditylang.org/${pathPrefix}/${fileName}`;
-    const list = await fetch(constructURL('list.json')).then(res => res.json());
-
+    const list = (await fetch(constructURL('list.json')).then(res => res.json()));
     const destDir = path.join(process.cwd(), 'setup-solc_downloads');
     await fs.mkdir(destDir);
     coreExports.addPath(destDir);
-
-    for (const [version, outs] of Object.entries(parseVersionInputs())) {
+    for (const [version, outs] of parseVersionInputs().entries()) {
         coreExports.info(`Setting up solc version ${version}`);
-
         const build = list.builds.find((build) => build.version == version);
         if (build === undefined) {
             throw Error(`Version ${version} not found`);
         }
-
         const downloaded = await toolCacheExports.downloadTool(constructURL(build.path));
         await fs.chmod(downloaded, 0o555);
-
-        await Promise.all(
-            outs.map((out) => fs.copyFile(
-                downloaded,
-                path.join(destDir, out)
-            ))
-        );
+        await Promise.all(outs.map((out) => fs.copyFile(downloaded, path.join(destDir, out))));
         console.info(`${version} at ${outs}`);
     }
-
-} catch (error) {
-    coreExports.setFailed(error.message);
+    ;
+    console.info(list);
 }
-
+catch (error) {
+    if (error instanceof Error) {
+        coreExports.setFailed(error.message);
+    }
+    else {
+        throw error;
+    }
+}
 function parseVersionInputs() {
-    let versions = {};
-
+    const versions = new Map();
     const v = coreExports.getInput('version');
     if (v != '') {
-        versions[v] = ['solc'];
+        versions.set(v, ['solc']);
     }
-
     const multi = coreExports.getInput('versions');
     if (multi == '') {
-        return versions
+        return versions;
     }
     multi.split(',').forEach((v) => {
         const out = `solc-v${v}`;
-        if (v in versions) {
-            versions[v].push(out);
-        } else {
-            versions[v] = [out];
+        if (versions.has(v)) {
+            versions.get(v)?.push(out);
+        }
+        else {
+            versions.set(v, [out]);
         }
     });
-
     return versions;
 }
 //# sourceMappingURL=index.js.map

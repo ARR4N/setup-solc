@@ -1,10 +1,13 @@
 {
   "name": "setup-solc",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "author": "github.com/arr4n",
   "license": "MIT",
   "description": "A GitHub action for installing the Solidity compiler, solc.",
+  "scripts": {
+    "package": "npx rollup --config rollup.config.js --configPlugin @rollup/plugin-typescript"
+  },
   "dependencies": {
     "@actions/core": "^1.11.1",
     "@actions/tool-cache": "^2.0.2"
@@ -12,6 +15,10 @@
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.6",
     "@rollup/plugin-node-resolve": "^16.0.2",
-    "rollup": "^4.52.4"
+    "@rollup/plugin-typescript": "^12.1.4",
+    "@types/node": "^24.7.0",
+    "rollup": "^4.52.4",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.3"
   }
 }

@@ -1,14 +1,14 @@
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path';
-import * as core from "@actions/core";
-import * as tc from "@actions/tool-cache";
+import * as core from '@actions/core';
+import * as tc from '@actions/tool-cache';
 
 try {
     if (process.arch != 'x64') {
         throw Error(`Unsupported architecture ${process.arch}`)
     }
 
-    let pathPrefix;
+    let pathPrefix: string;
     switch (process.platform) {
         case 'darwin':
             pathPrefix = 'macosx-amd64';
@@ -20,14 +20,19 @@ try {
             throw Error(`Unsupported platform ${process.platform}`);
     }
 
-    const constructURL = (fileName) => `https://binaries.soliditylang.org/${pathPrefix}/${fileName}`;
-    const list = await fetch(constructURL('list.json')).then(res => res.json());
+    const constructURL = (fileName: string) => `https://binaries.soliditylang.org/${pathPrefix}/${fileName}`;
+    const list = (await fetch(constructURL('list.json')).then(res => res.json())) as {
+        builds: {
+            version: string;
+            path: string;
+        }[];
+    };
 
     const destDir = path.join(process.cwd(), 'setup-solc_downloads');
     await fs.mkdir(destDir);
     core.addPath(destDir);
 
-    for (const [version, outs] of Object.entries(parseVersionInputs())) {
+    for (const [version, outs] of parseVersionInputs().entries()) {
         core.info(`Setting up solc version ${version}`);
 
         const build = list.builds.find((build) => build.version == version);
@@ -45,18 +50,24 @@ try {
             ))
         );
         console.info(`${version} at ${outs}`);
-    }
+    };
 
-} catch (error) {
-    core.setFailed(error.message)
+    console.info(list);
+
+} catch (error: any) {
+    if (error instanceof Error) {
+        core.setFailed(error.message)
+    } else {
+        throw error;
+    }
 }
 
-function parseVersionInputs() {
-    let versions = {};
+function parseVersionInputs(): Map<string, string[]> {
+    const versions = new Map<string, string[]>();
 
     const v = core.getInput('version');
     if (v != '') {
-        versions[v] = ['solc'];
+        versions.set(v, ['solc']);
     }
 
     const multi = core.getInput('versions');
@@ -65,10 +76,10 @@ function parseVersionInputs() {
     }
     multi.split(',').forEach((v) => {
         const out = `solc-v${v}`;
-        if (v in versions) {
-            versions[v].push(out);
+        if (versions.has(v)) {
+            versions.get(v)?.push(out);
         } else {
-            versions[v] = [out];
+            versions.set(v, [out]);
         }
     })
 
