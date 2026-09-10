@@ -34,7 +34,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     name: test-all # PRs can require just this job to pass, regardless of matrix changes below
-    needs: [check_dist, test_matrix, test_multi]
+    needs: [check_dist, test_matrix, test_multi, test_repeated]
     steps:
       - run: echo "Test-matrix successful" # anything with zero exit code
 
@@ -79,5 +79,38 @@ jobs:
         - name: Check versions
           run: |
             solc --version | grep 0.8.30;
+            solc-v0.8.30 --version | grep 0.8.30;
+            solc-v0.8.29 --version | grep 0.8.29;
+
+  test_repeated:
+    needs: check_dist
+    name: setup-solc-again
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@v5
+
+        - name: Initial
+          uses: ./
+          with:
+            version: 0.8.30
+            versions: '0.8.30,0.8.29'
+
+        - name: Check initial version
+          run: |
+            solc --version | grep 0.8.30;
+            solc-v0.8.30 --version | grep 0.8.30;
+            solc-v0.8.29 --version | grep 0.8.29;
+
+        - name: Re-installation
+          uses: ./
+          with:
+            version: 0.8.29
+            # Check that solc-v0.8.30 existence doesn't cause an error, and that
+            # solc-v0.8.29 isn't removed despite not being specified.
+            versions: '0.8.30'
+
+        - name: Check re-installed version
+          run: |
+            solc --version | grep 0.8.29;
             solc-v0.8.30 --version | grep 0.8.30;
             solc-v0.8.29 --version | grep 0.8.29;
