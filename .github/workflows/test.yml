@@ -30,6 +30,8 @@ jobs:
           with:
             version: ${{matrix.solc}}
 
+        - uses: actions/checkout@v5
+
         - name: Check version
           run: solc --version | grep "${{matrix.solc}}"
 
