@@ -30,6 +30,12 @@ jobs:
           with:
             version: ${{matrix.solc}}
 
+        - name: Overwrite workspace
+          uses: actions/checkout@v5
+          # An old version of setup-solc downloaded the binaries to the runner
+          # workspace, which meant it had to be run _after_ actions/checkout to
+          # avoid being overwritten. This step acts as a regression test.
+
         - name: Check version
           run: solc --version | grep "${{matrix.solc}}"
 
