@@ -1,4 +1,5 @@
 import * as fs from 'node:fs/promises';
+import * as os from 'node:os';
 import * as path from 'node:path';
 import require$$0 from 'os';
 import require$$0$1 from 'crypto';
@@ -29835,8 +29836,8 @@ try {
     }
     const constructURL = (fileName) => `https://binaries.soliditylang.org/${pathPrefix}/${fileName}`;
     const list = (await fetch(constructURL('list.json')).then(res => res.json()));
-    const destDir = path.join(process.cwd(), 'setup-solc_downloads');
-    await fs.mkdir(destDir);
+    const destDir = path.join(process.env.RUNNER_TEMP ?? os.tmpdir(), 'setup-solc_downloads');
+    await fs.mkdir(destDir, { recursive: true });
     coreExports.addPath(destDir);
     for (const [version, outs] of parseVersionInputs().entries()) {
         coreExports.info(`Setting up solc version ${version}`);
@@ -29850,7 +29851,6 @@ try {
         console.info(`${version} at ${outs}`);
     }
     ;
-    console.info(list);
 }
 catch (error) {
     if (error instanceof Error) {

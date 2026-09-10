@@ -1,4 +1,5 @@
-import * as fs from 'node:fs/promises'
+import * as fs from 'node:fs/promises';
+import * as os from 'node:os';
 import * as path from 'node:path';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
@@ -28,8 +29,8 @@ try {
         }[];
     };
 
-    const destDir = path.join(process.cwd(), 'setup-solc_downloads');
-    await fs.mkdir(destDir);
+    const destDir = path.join(process.env.RUNNER_TEMP ?? os.tmpdir(), 'setup-solc_downloads');
+    await fs.mkdir(destDir, { recursive: true });
     core.addPath(destDir);
 
     for (const [version, outs] of parseVersionInputs().entries()) {
@@ -51,8 +52,6 @@ try {
         );
         console.info(`${version} at ${outs}`);
     };
-
-    console.info(list);
 
 } catch (error: any) {
     if (error instanceof Error) {
