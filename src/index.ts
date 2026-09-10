@@ -53,6 +53,8 @@ try {
         console.info(`${version} at ${outs}`);
     };
 
+    console.info("DO NOT MERGE THIS LINE");
+
 } catch (error: any) {
     if (error instanceof Error) {
         core.setFailed(error.message)
