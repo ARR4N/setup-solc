@@ -8,14 +8,38 @@ on:
   workflow_dispatch:
 
 jobs:
+  check_dist:
+    name: dist-up-to-date
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@v5
+
+        - uses: actions/setup-node@v6
+          with:
+            node-version: '20' # matches `runs.using` in action.yml
+            cache: npm
+
+        - run: npm ci
+        - run: npm run package
+        
+        - name: Check `dist` matches `src`
+          # `dist` is committed because that's what `action.yml` runs, so it
+          # MUST be rebuilt whenever `src` changes.
+          run: |
+            if ! git --no-pager diff --exit-code -- dist; then
+              echo '::error::dist is stale; run `npm run package` and commit the result.' >&2
+              exit 1
+            fi
+
   test:
     runs-on: ubuntu-latest
     name: test-all # PRs can require just this job to pass, regardless of matrix changes below
-    needs: [test_matrix, test_multi]
+    needs: [check_dist, test_matrix, test_multi]
     steps:
       - run: echo "Test-matrix successful" # anything with zero exit code
 
   test_matrix:
+    needs: check_dist
     strategy:
       matrix:
         os: [macos-15-intel, ubuntu-latest] # arm64 and Windows aren't supported
@@ -40,6 +64,7 @@ jobs:
           run: solc --version | grep "${{matrix.solc}}"
 
   test_multi:
+    needs: check_dist
     name: setup-solc-multi-version
     runs-on: ubuntu-latest
     steps:
