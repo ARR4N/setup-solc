@@ -42,13 +42,14 @@ try {
         }
 
         const downloaded = await tc.downloadTool(constructURL(build.path));
-        await fs.chmod(downloaded, 0o555);
 
         await Promise.all(
-            outs.map((out) => fs.copyFile(
-                downloaded,
-                path.join(destDir, out)
-            ))
+            outs.map(async (out) => {
+                const dest = path.join(destDir, out);
+                await fs.rm(dest, { force: true }); // allow multiple invocations
+                await fs.copyFile(downloaded, dest);
+                await fs.chmod(dest, 0o555);
+            })
         );
         console.info(`${version} at ${outs}`);
     };

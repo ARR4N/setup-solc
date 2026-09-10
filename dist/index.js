@@ -29846,8 +29846,12 @@ try {
             throw Error(`Version ${version} not found`);
         }
         const downloaded = await toolCacheExports.downloadTool(constructURL(build.path));
-        await fs.chmod(downloaded, 0o555);
-        await Promise.all(outs.map((out) => fs.copyFile(downloaded, path.join(destDir, out))));
+        await Promise.all(outs.map(async (out) => {
+            const dest = path.join(destDir, out);
+            await fs.rm(dest, { force: true }); // allow multiple invocations
+            await fs.copyFile(downloaded, dest);
+            await fs.chmod(dest, 0o555);
+        }));
         console.info(`${version} at ${outs}`);
     }
     ;
