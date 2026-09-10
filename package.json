@@ -1,6 +1,6 @@
 {
   "name": "setup-solc",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "type": "module",
   "author": "github.com/arr4n",
   "license": "MIT",
